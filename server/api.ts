@@ -89,7 +89,11 @@ app.get('/api/blog', (_req, res) => {
 
 app.get('/api/blog/:slug', (req, res) => {
   try {
-    const filePath = join(BLOG_DIR, `${req.params.slug}.md`);
+    const cleanSlug = req.params.slug.replace(/\.(md|mdx)$/, '');
+    let filePath = join(BLOG_DIR, `${cleanSlug}.md`);
+    if (!existsSync(filePath)) {
+      filePath = join(BLOG_DIR, `${cleanSlug}.mdx`);
+    }
     if (!existsSync(filePath)) {
       return res.status(404).json({ error: 'Blog post not found' });
     }
@@ -104,7 +108,8 @@ app.get('/api/blog/:slug', (req, res) => {
 
 app.put('/api/blog/:slug', (req, res) => {
   try {
-    const filePath = join(BLOG_DIR, `${req.params.slug}.md`);
+    const cleanSlug = req.params.slug.replace(/\.(md|mdx)$/, '');
+    const filePath = join(BLOG_DIR, `${cleanSlug}.md`);
     const { frontmatter, body } = req.body;
     const yaml = Object.entries(frontmatter || {})
       .map(([key, value]) => {
@@ -117,7 +122,7 @@ app.put('/api/blog/:slug', (req, res) => {
       .join('\n');
     const content = `---\n${yaml}\n---\n\n${body || ''}\n`;
     writeFileSync(filePath, content, 'utf-8');
-    res.json({ success: true, slug: req.params.slug });
+    res.json({ success: true, slug: cleanSlug });
   } catch (err) {
     res.status(500).json({ error: 'Failed to write blog post' });
   }
@@ -125,11 +130,19 @@ app.put('/api/blog/:slug', (req, res) => {
 
 app.delete('/api/blog/:slug', (req, res) => {
   try {
-    const filePath = join(BLOG_DIR, `${req.params.slug}.md`);
-    if (existsSync(filePath)) {
-      unlinkSync(filePath);
+    const cleanSlug = req.params.slug.replace(/\.(md|mdx)$/, '');
+    let filePath = join(BLOG_DIR, `${cleanSlug}.md`);
+    if (!existsSync(filePath)) {
+      filePath = join(BLOG_DIR, `${cleanSlug}.mdx`);
     }
-    res.json({ success: true });
+    if (!existsSync(filePath)) {
+      return res.status(404).json({ error: `Blog post "${cleanSlug}" not found on disk` });
+    }
+    unlinkSync(filePath);
+    if (existsSync(filePath)) {
+      return res.status(500).json({ error: `Failed to delete blog post file for "${cleanSlug}" from disk` });
+    }
+    res.json({ success: true, message: `Blog post "${cleanSlug}" deleted from disk` });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete blog post' });
   }

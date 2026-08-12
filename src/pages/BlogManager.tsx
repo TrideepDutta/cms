@@ -60,7 +60,7 @@ export function BlogManager() {
       category: 'Technical SEO',
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       readTime: '5 min read',
-      draft: true,
+      draft: false,
       author: 'GetUsRanked Team',
       tags: ['SEO', 'Search'],
       body: '## Introduction\n\nWrite your blog article in Markdown here...\n\n### Key Takeaways\n- Point 1\n- Point 2\n',
@@ -113,13 +113,16 @@ export function BlogManager() {
   };
 
   const deletePost = async (slug: string) => {
-    if (!confirm(`Are you sure you want to delete "${slug}"?`)) return;
+    if (!window.confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
     try {
       const res = await fetch(`/api/blog/${slug}`, { method: 'DELETE' });
-      if (res.ok) {
-        showToast('Post deleted');
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
+        showToast('Post deleted from disk');
         if (editingPost?.slug === slug) setEditingPost(null);
         loadPosts();
+      } else {
+        showToast(data.error || 'Failed to delete post from disk', 'error');
       }
     } catch {
       showToast('Failed to delete post', 'error');
@@ -197,13 +200,25 @@ export function BlogManager() {
               <input className="cms-input" value={editingPost.slug} onChange={e => setEditingPost({ ...editingPost, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') })} />
             </div>
             <div className="cms-form-group">
-              <label className="cms-label">Article Category</label>
-              <select className="cms-select" value={editingPost.category} onChange={e => setEditingPost({ ...editingPost, category: e.target.value })}>
-                {CATEGORIES.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
+              <label className="cms-label">Publication Status</label>
+              <select
+                className="cms-select"
+                value={editingPost.draft ? 'draft' : 'published'}
+                onChange={e => setEditingPost({ ...editingPost, draft: e.target.value === 'draft' })}
+              >
+                <option value="published">Published (Visible on site)</option>
+                <option value="draft">Draft (Hidden from site)</option>
               </select>
             </div>
+          </div>
+
+          <div className="cms-form-group">
+            <label className="cms-label">Article Category</label>
+            <select className="cms-select" value={editingPost.category} onChange={e => setEditingPost({ ...editingPost, category: e.target.value })}>
+              {CATEGORIES.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
           </div>
 
           <div className="cms-form-group">
@@ -299,8 +314,13 @@ export function BlogManager() {
               {posts.map(post => (
                 <div key={post.slug} className="cms-array-item" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.2rem' }}>
-                      {post.title || post.slug}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+                      <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>
+                        {post.title || post.slug}
+                      </span>
+                      <span className={`cms-card-badge ${post.draft ? 'gold' : 'green'}`}>
+                        {post.draft ? 'Draft' : 'Published'}
+                      </span>
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--cms-text-soft)', fontFamily: 'var(--font-mono)' }}>
                       Category: <span style={{ color: 'var(--cms-blue-soft)' }}>{post.category || 'General'}</span> • Date: {post.date || 'Draft'}
