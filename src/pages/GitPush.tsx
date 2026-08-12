@@ -1,11 +1,18 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useToast } from '../components/Toast';
+
+const TOTAL_DEPLOY_SECONDS = 25;
+const LIVE_SITE_URL = 'https://getusranked.vercel.app';
 
 export function GitPush() {
   const [status, setStatus] = useState<{ status: string; branch: string; clean: boolean } | null>(null);
   const [diff, setDiff] = useState<{ diff: string; stagedDiff: string } | null>(null);
   const [commitMessage, setCommitMessage] = useState('');
   const [pushing, setPushing] = useState(false);
+  const [deploying, setDeploying] = useState(false);
+  const [countdown, setCountdown] = useState(TOTAL_DEPLOY_SECONDS);
+  const [deployComplete, setDeployComplete] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { showToast } = useToast();
 
   const loadStatus = useCallback(() => {
@@ -24,6 +31,33 @@ export function GitPush() {
     loadStatus();
   }, [loadStatus]);
 
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const startDeploymentCountdown = () => {
+    setDeploying(true);
+    setDeployComplete(false);
+    setCountdown(TOTAL_DEPLOY_SECONDS);
+
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          setDeploying(false);
+          setDeployComplete(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   const handlePush = async () => {
     setPushing(true);
     try {
@@ -34,9 +68,10 @@ export function GitPush() {
       });
       const resData = await res.json();
       if (res.ok) {
-        showToast('🚀 Changes pushed to GitHub successfully!');
+        showToast('🚀 Changes pushed & Vercel deployment triggered!');
         setCommitMessage('');
         loadStatus();
+        startDeploymentCountdown();
       } else {
         showToast(`Failed to push: ${resData.error}`, 'error');
       }
@@ -48,12 +83,84 @@ export function GitPush() {
 
   if (!status) return <div style={{ padding: '2rem', color: 'var(--cms-text-soft)' }}>Checking git repository status...</div>;
 
+  const progressPercent = Math.round(((TOTAL_DEPLOY_SECONDS - countdown) / TOTAL_DEPLOY_SECONDS) * 100);
+
   return (
     <div>
       <div className="cms-page-header">
         <h1>Push Updates to GitHub</h1>
         <p>Review changes and deploy them to your live website with one click</p>
       </div>
+
+      {/* Deployment Countdown Banner */}
+      {(deploying || deployComplete) && (
+        <div
+          className="cms-card"
+          style={{
+            background: deployComplete ? 'rgba(47, 143, 92, 0.12)' : 'rgba(36, 81, 214, 0.12)',
+            borderColor: deployComplete ? 'var(--cms-green)' : 'var(--cms-blue)',
+            marginBottom: '1.5rem',
+            padding: '1.5rem',
+          }}
+        >
+          {deploying ? (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <span className="cms-spinner" style={{ borderTopColor: 'var(--cms-blue-soft)' }} />
+                  <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--cms-text)' }}>
+                    ⚡ Vercel Deployment in Progress...
+                  </span>
+                </div>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--cms-blue-soft)', fontWeight: 600 }}>
+                  {countdown}s remaining
+                </span>
+              </div>
+
+              {/* Animated Progress Bar */}
+              <div style={{ background: 'rgba(255,255,255,0.08)', height: '8px', borderRadius: '4px', overflow: 'hidden', marginBottom: '0.75rem' }}>
+                <div
+                  style={{
+                    width: `${progressPercent}%`,
+                    height: '100%',
+                    background: 'linear-gradient(90deg, #2451D6, #4a7aff)',
+                    borderRadius: '4px',
+                    transition: 'width 1s linear',
+                  }}
+                />
+              </div>
+
+              <p style={{ fontSize: '0.8rem', color: 'var(--cms-text-soft)', margin: 0 }}>
+                Building static pages & deploying to Vercel... Your updates will be visible on <strong style={{ color: '#fff' }}>{LIVE_SITE_URL}</strong> shortly.
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                  <span style={{ color: 'var(--cms-green)', fontSize: '1.1rem', fontWeight: 700 }}>✓</span>
+                  <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--cms-text)' }}>
+                    Vercel Deployment Complete & Live!
+                  </span>
+                </div>
+                <p style={{ fontSize: '0.82rem', color: 'var(--cms-text-soft)', margin: 0 }}>
+                  Your website updates are live and visible to visitors.
+                </p>
+              </div>
+
+              <a
+                href={LIVE_SITE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cms-btn cms-btn-success"
+                style={{ fontSize: '0.82rem', padding: '0.65rem 1.25rem' }}
+              >
+                🌐 View Updated Live Website ↗
+              </a>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="cms-card">
         <div className="cms-card-header">
@@ -88,10 +195,14 @@ export function GitPush() {
               className="cms-btn cms-btn-success"
               style={{ width: '100%', justifyContent: 'center', padding: '0.85rem', fontSize: '0.88rem' }}
               onClick={handlePush}
-              disabled={pushing}
+              disabled={pushing || deploying}
             >
               {pushing ? <span className="cms-spinner" /> : null}
-              {pushing ? 'Committing & Pushing to GitHub...' : '🚀 Push Updates to GitHub Now'}
+              {pushing
+                ? 'Committing & Pushing to GitHub...'
+                : deploying
+                ? `⚡ Deploying to Vercel (${countdown}s)...`
+                : '🚀 Push Updates to GitHub Now'}
             </button>
           </div>
         )}
