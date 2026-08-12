@@ -180,7 +180,7 @@ app.get('/api/git/diff', (_req, res) => {
   }
 });
 
-const VERCEL_DEPLOY_HOOK = 'https://api.vercel.com/v1/integrations/deploy/prj_3rmdL3Xejui1qT6tuxBeZ0chqXG2/eb5rxGK9EQ';
+const VERCEL_DEPLOY_HOOK = process.env.VERCEL_DEPLOY_HOOK;
 
 app.post('/api/git/push', async (req, res) => {
   try {
@@ -200,12 +200,14 @@ app.post('/api/git/push', async (req, res) => {
 
     const output = execSync(`git push origin ${branch}`, { cwd: ASTRO_ROOT, encoding: 'utf-8', stdio: 'pipe' });
 
-    // Trigger Vercel Deploy Hook automatically
+    // Trigger Vercel Deploy Hook automatically if configured
     let hookStatus = '';
-    try {
-      const hookRes = await fetch(VERCEL_DEPLOY_HOOK, { method: 'POST' });
-      if (hookRes.ok) hookStatus = ' (Vercel deployment triggered)';
-    } catch (e) {}
+    if (VERCEL_DEPLOY_HOOK) {
+      try {
+        const hookRes = await fetch(VERCEL_DEPLOY_HOOK, { method: 'POST' });
+        if (hookRes.ok) hookStatus = ' (Vercel deployment triggered)';
+      } catch (e) {}
+    }
 
     res.json({ success: true, message: message + hookStatus, output: output || 'Pushed successfully' });
   } catch (err: any) {
