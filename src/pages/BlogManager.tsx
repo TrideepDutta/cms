@@ -55,12 +55,12 @@ export function BlogManager() {
     const slug = `new-post-${Date.now()}`;
     const newPost: BlogPost = {
       slug,
-      title: 'New SEO Playbook Article',
-      excerpt: 'Short description of article content for index cards.',
+      title: '',
+      excerpt: '',
       category: 'Technical SEO',
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       readTime: '5 min read',
-      draft: false,
+      draft: true,
       author: 'GetUsRanked Team',
       tags: ['SEO', 'Search'],
       body: '## Introduction\n\nWrite your blog article in Markdown here...\n\n### Key Takeaways\n- Point 1\n- Point 2\n',
