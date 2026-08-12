@@ -30,8 +30,8 @@ export function PageEditor() {
         const keys = Object.keys(d).filter(k => typeof d[k] === 'object' && !Array.isArray(d[k]) && k !== 'seo');
         setOpenSections(new Set(keys));
       })
-      .catch(() => showToast('Failed to load content', 'error'));
-  }, [page]);
+      .catch(() => showToast('Failed to load page content', 'error'));
+  }, [page, showToast]);
 
   const save = useCallback(async () => {
     if (!page || !data) return;
@@ -44,7 +44,7 @@ export function PageEditor() {
       });
       showToast(`${PAGE_TITLES[page] || page} saved successfully`);
     } catch {
-      showToast('Failed to save', 'error');
+      showToast('Failed to save page changes', 'error');
     }
     setSaving(false);
   }, [page, data, showToast]);
@@ -130,7 +130,7 @@ export function PageEditor() {
     }
     const newSectionData = {
       visible: true,
-      eyebrow: cleanKey,
+      eyebrow: cleanKey.toUpperCase(),
       heading: `New ${cleanKey} Section`,
       body: 'Section body description goes here...',
       items: [],
@@ -151,7 +151,7 @@ export function PageEditor() {
   };
 
   const handleDeleteSection = (sectionKey: string) => {
-    if (!confirm(`Are you sure you want to delete the section "${sectionKey}"?`)) return;
+    if (!confirm(`Are you sure you want to delete section "${sectionKey}"?`)) return;
     setData((prev: any) => {
       const updated = { ...prev };
       delete updated[sectionKey];
@@ -163,18 +163,20 @@ export function PageEditor() {
     showToast(`Deleted section: ${sectionKey}`);
   };
 
-  if (!data) return <div style={{ padding: '2rem', color: 'var(--cms-text-soft)' }}>Loading page content...</div>;
+  if (!data) return <div style={{ padding: '2rem', color: 'var(--cms-ink-soft)', fontFamily: 'var(--font-mono)' }}>Loading page content data...</div>;
 
   const sectionKeys = Object.keys(data).filter(k => typeof data[k] === 'object' && !Array.isArray(data[k]) && k !== 'seo');
 
   return (
     <div>
+      {/* Page Header */}
       <div className="cms-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
+          <span className="cms-eyebrow">[ PAGE CONTENT EDITOR ]</span>
           <h1>{PAGE_TITLES[page || ''] || page}</h1>
-          <p>Edit content, reorder, add, or morph sections for {PAGE_TITLES[page || ''] || page}</p>
+          <p>Edit section headlines, body copy, list items, and section ordering</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.65rem' }}>
           <button className="cms-btn cms-btn-ghost" onClick={() => setShowAddSection(!showAddSection)}>
             + Add Section
           </button>
@@ -185,16 +187,16 @@ export function PageEditor() {
         </div>
       </div>
 
-      {/* Add New Section Modal / Bar */}
+      {/* Add New Section Banner */}
       {showAddSection && (
-        <div className="cms-card" style={{ background: 'rgba(36, 81, 214, 0.1)', borderColor: 'var(--cms-blue)', marginBottom: '1.5rem' }}>
+        <div className="cms-card" style={{ borderLeft: '4px solid var(--cms-blue)', marginBottom: '1.5rem' }}>
           <div className="cms-card-header">
             <span className="cms-card-title">Add Custom Page Section</span>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
             <input
               className="cms-input"
-              placeholder="e.g. testimonials, services, features"
+              placeholder="Section key name (e.g. features, testimonials)"
               value={newSectionName}
               onChange={e => setNewSectionName(e.target.value)}
             />
@@ -204,22 +206,26 @@ export function PageEditor() {
         </div>
       )}
 
-      {/* Quick Jump Bar */}
-      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-        <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--cms-text-soft)', alignSelf: 'center' }}>Sections:</span>
+      {/* Section Quick Filter Chips */}
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem', alignItems: 'center' }}>
+        <span className="cms-eyebrow" style={{ marginRight: '0.25rem' }}>SECTIONS:</span>
         {data.seo && (
-          <button className="cms-btn cms-btn-ghost cms-btn-sm" onClick={() => toggleSection('seo')}>🔍 SEO</button>
+          <button className="cms-btn cms-btn-ghost cms-btn-sm" onClick={() => toggleSection('seo')}>
+            🔍 SEO
+          </button>
         )}
         {data.sectionOrder && (
-          <button className="cms-btn cms-btn-ghost cms-btn-sm" onClick={() => toggleSection('sectionOrder')}>📐 Order</button>
+          <button className="cms-btn cms-btn-ghost cms-btn-sm" onClick={() => toggleSection('sectionOrder')}>
+            📐 ORDER
+          </button>
         )}
-        {sectionKeys.map(k => (
+        {sectionKeys.map((k, idx) => (
           <button
             key={k}
             className={`cms-btn cms-btn-sm ${openSections.has(k) ? 'cms-btn-primary' : 'cms-btn-ghost'}`}
             onClick={() => toggleSection(k)}
           >
-            {k}
+            {String(idx + 1).padStart(2, '0')} {k.toUpperCase()}
           </button>
         ))}
       </div>
@@ -228,13 +234,16 @@ export function PageEditor() {
       {data.seo && (
         <div className="cms-section">
           <div className="cms-section-header" onClick={() => toggleSection('seo')}>
-            <span className="cms-section-title">🔍 SEO Settings</span>
+            <div className="cms-section-title">
+              <span className="cms-section-numeral">00</span>
+              Search Engine Optimization (SEO)
+            </div>
             <span className={`cms-section-toggle ${openSections.has('seo') ? 'open' : ''}`}>▼</span>
           </div>
           {openSections.has('seo') && (
             <div className="cms-section-body">
               <div className="cms-form-group">
-                <label className="cms-label">Page Title</label>
+                <label className="cms-label">Page Title Tag</label>
                 <input className="cms-input" value={data.seo.title || ''} onChange={e => updateField(['seo', 'title'], e.target.value)} />
               </div>
               <div className="cms-form-group">
@@ -246,19 +255,24 @@ export function PageEditor() {
         </div>
       )}
 
-      {/* Section Order (if present) */}
+      {/* Section Order */}
       {data.sectionOrder && (
         <div className="cms-section">
           <div className="cms-section-header" onClick={() => toggleSection('sectionOrder')}>
-            <span className="cms-section-title">📐 Page Section Order</span>
+            <div className="cms-section-title">
+              <span className="cms-section-numeral">📐</span>
+              Page Section Order
+            </div>
             <span className={`cms-section-toggle ${openSections.has('sectionOrder') ? 'open' : ''}`}>▼</span>
           </div>
           {openSections.has('sectionOrder') && (
             <div className="cms-section-body">
               {data.sectionOrder.map((sectionId: string, idx: number) => (
                 <div key={idx} className="cms-array-item" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--cms-text-soft)' }}>#{idx + 1}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontFamily: 'var(--font-numeral)', fontSize: '0.85rem', fontWeight: 700, color: 'var(--cms-blue)' }}>
+                      #{String(idx + 1).padStart(2, '0')}
+                    </span>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.88rem', fontWeight: 600 }}>{sectionId}</span>
                   </div>
                   <div className="cms-array-item-actions">
@@ -273,7 +287,7 @@ export function PageEditor() {
       )}
 
       {/* Dynamic Sections */}
-      {Object.entries(data).map(([key, value]) => {
+      {Object.entries(data).map(([key, value], idx) => {
         if (key === 'seo' || key === 'sectionOrder') return null;
         if (typeof value !== 'object' || value === null) {
           return (
@@ -288,11 +302,16 @@ export function PageEditor() {
           );
         }
 
+        const formattedNum = String(idx + 1).padStart(2, '0');
+
         return (
           <div key={key} className="cms-section">
             <div className="cms-section-header" onClick={() => toggleSection(key)}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <span className="cms-section-title">{key}</span>
+                <span className="cms-section-title">
+                  <span className="cms-section-numeral">{formattedNum}</span>
+                  {key.toUpperCase()}
+                </span>
                 {(value as any).visible !== undefined && (
                   <label className="cms-toggle" onClick={e => e.stopPropagation()}>
                     <input type="checkbox" checked={(value as any).visible} onChange={e => updateField([key, 'visible'], e.target.checked)} />
@@ -310,7 +329,7 @@ export function PageEditor() {
                     handleDeleteSection(key);
                   }}
                 >
-                  🗑️
+                  ✕
                 </button>
                 <span className={`cms-section-toggle ${openSections.has(key) ? 'open' : ''}`}>▼</span>
               </div>
@@ -381,7 +400,7 @@ function renderObjectFields(
           return (
             <div key={key} className="cms-form-group">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <label className="cms-label" style={{ marginBottom: 0 }}>{key} ({value.length} items)</label>
+                <label className="cms-label" style={{ marginBottom: 0 }}>{key} [{value.length}]</label>
                 <button className="cms-btn cms-btn-ghost cms-btn-sm" onClick={() => {
                   const template = value.length > 0 ?
                     (typeof value[0] === 'object' ?
@@ -397,7 +416,7 @@ function renderObjectFields(
                 <div key={idx} className="cms-array-item">
                   <div className="cms-array-item-header">
                     <span className="cms-array-item-number">
-                      Item {idx + 1}{typeof item === 'object' && item.title ? ` — ${item.title}` : typeof item === 'object' && item.label ? ` — ${item.label}` : typeof item === 'object' && item.name ? ` — ${item.name}` : ''}
+                      #{String(idx + 1).padStart(2, '0')}{typeof item === 'object' && item.title ? ` — ${item.title}` : typeof item === 'object' && item.label ? ` — ${item.label}` : typeof item === 'object' && item.name ? ` — ${item.name}` : ''}
                     </span>
                     <div className="cms-array-item-actions">
                       <button className="cms-icon-btn" title="Duplicate" onClick={() => duplicateArrayItem(currentPath, idx)}>📋</button>
@@ -419,9 +438,9 @@ function renderObjectFields(
 
         if (typeof value === 'object' && value !== null) {
           return (
-            <div key={key} className="cms-card" style={{ marginLeft: '0.5rem', borderColor: 'var(--cms-border)' }}>
+            <div key={key} className="cms-card" style={{ marginLeft: '0.25rem', borderColor: 'var(--cms-line-strong)' }}>
               <div className="cms-card-header">
-                <span className="cms-card-title" style={{ fontSize: '0.9rem' }}>{key}</span>
+                <span className="cms-card-title" style={{ fontSize: '0.92rem' }}>{key.toUpperCase()}</span>
               </div>
               {renderObjectFields(value, currentPath, updateField, addArrayItem, duplicateArrayItem, removeArrayItem, moveArrayItem)}
             </div>

@@ -30,7 +30,7 @@ export function NavigationEditor() {
       .then(r => r.json())
       .then(setData)
       .catch(() => showToast('Failed to load navigation data', 'error'));
-  }, []);
+  }, [showToast]);
 
   const save = useCallback(async () => {
     if (!data) return;
@@ -41,7 +41,7 @@ export function NavigationEditor() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      showToast('Navigation settings saved');
+      showToast('Navigation settings saved successfully');
     } catch {
       showToast('Failed to save navigation', 'error');
     }
@@ -114,14 +114,15 @@ export function NavigationEditor() {
     setData({ ...data, footer: { ...data.footer, quickLinks: newLinks } });
   };
 
-  if (!data) return <div style={{ padding: '2rem', color: 'var(--cms-text-soft)' }}>Loading navigation...</div>;
+  if (!data) return <div style={{ padding: '2rem', color: 'var(--cms-ink-soft)', fontFamily: 'var(--font-mono)' }}>Loading navigation...</div>;
 
   return (
     <div>
       <div className="cms-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
+          <span className="cms-eyebrow">[ SITE STRUCTURE ]</span>
           <h1>Navigation Editor</h1>
-          <p>Manage header menu links, buttons, and footer quick links</p>
+          <p>Configure header menu links, call-to-action buttons, and footer quick links</p>
         </div>
         <button className="cms-btn cms-btn-primary" onClick={save} disabled={saving}>
           {saving ? <span className="cms-spinner" /> : null}
@@ -132,27 +133,30 @@ export function NavigationEditor() {
       {/* Header Nav Section */}
       <div className="cms-card">
         <div className="cms-card-header">
-          <span className="cms-card-title">Header Navigation</span>
+          <span className="cms-card-title">Header Navigation Menu</span>
           <button className="cms-btn cms-btn-ghost cms-btn-sm" onClick={addHeaderLink}>+ Add Link</button>
         </div>
 
         <div className="cms-form-row" style={{ marginBottom: '1.5rem' }}>
           <div>
-            <label className="cms-label">CTA Button Text</label>
+            <label className="cms-label">Header CTA Button Text</label>
             <input className="cms-input" value={data.header.ctaText} onChange={e => setData({ ...data, header: { ...data.header, ctaText: e.target.value } })} />
           </div>
           <div>
-            <label className="cms-label">CTA Button Link</label>
+            <label className="cms-label">Header CTA Target Link</label>
             <input className="cms-input" value={data.header.ctaHref} onChange={e => setData({ ...data, header: { ...data.header, ctaHref: e.target.value } })} />
           </div>
         </div>
 
-        <label className="cms-label">Menu Links ({data.header.navLinks.length})</label>
+        <label className="cms-label">Menu Navigation Links [{data.header.navLinks.length}]</label>
         {data.header.navLinks.map((link, idx) => (
           <div key={idx} className="cms-array-item" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span style={{ fontFamily: 'var(--font-numeral)', fontSize: '0.85rem', fontWeight: 700, color: 'var(--cms-blue)' }}>
+              #{String(idx + 1).padStart(2, '0')}
+            </span>
             <div style={{ flex: 1 }} className="cms-form-row">
-              <input className="cms-input" placeholder="Label" value={link.label} onChange={e => updateHeaderLink(idx, 'label', e.target.value)} />
-              <input className="cms-input" placeholder="URL (/path)" value={link.href} onChange={e => updateHeaderLink(idx, 'href', e.target.value)} />
+              <input className="cms-input" placeholder="Display Label" value={link.label} onChange={e => updateHeaderLink(idx, 'label', e.target.value)} />
+              <input className="cms-input" placeholder="Target URL (/path)" value={link.href} onChange={e => updateHeaderLink(idx, 'href', e.target.value)} />
             </div>
             <div className="cms-array-item-actions">
               <button className="cms-icon-btn" disabled={idx === 0} onClick={() => moveHeaderLink(idx, 'up')}>↑</button>
@@ -166,7 +170,7 @@ export function NavigationEditor() {
       {/* Footer Nav Section */}
       <div className="cms-card" style={{ marginTop: '1.5rem' }}>
         <div className="cms-card-header">
-          <span className="cms-card-title">Footer Navigation</span>
+          <span className="cms-card-title">Footer Navigation & Links</span>
           <button className="cms-btn cms-btn-ghost cms-btn-sm" onClick={addFooterLink}>+ Add Quick Link</button>
         </div>
 
@@ -176,17 +180,20 @@ export function NavigationEditor() {
             <input className="cms-input" value={data.footer.ctaText} onChange={e => setData({ ...data, footer: { ...data.footer, ctaText: e.target.value } })} />
           </div>
           <div>
-            <label className="cms-label">Footer CTA Link</label>
+            <label className="cms-label">Footer CTA Target Link</label>
             <input className="cms-input" value={data.footer.ctaHref} onChange={e => setData({ ...data, footer: { ...data.footer, ctaHref: e.target.value } })} />
           </div>
         </div>
 
-        <label className="cms-label">Quick Links ({data.footer.quickLinks.length})</label>
+        <label className="cms-label">Footer Quick Links [{data.footer.quickLinks.length}]</label>
         {data.footer.quickLinks.map((link, idx) => (
           <div key={idx} className="cms-array-item" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span style={{ fontFamily: 'var(--font-numeral)', fontSize: '0.85rem', fontWeight: 700, color: 'var(--cms-blue)' }}>
+              #{String(idx + 1).padStart(2, '0')}
+            </span>
             <div style={{ flex: 1 }} className="cms-form-row">
-              <input className="cms-input" placeholder="Label" value={link.label} onChange={e => updateFooterLink(idx, 'label', e.target.value)} />
-              <input className="cms-input" placeholder="URL (/path)" value={link.href} onChange={e => updateFooterLink(idx, 'href', e.target.value)} />
+              <input className="cms-input" placeholder="Display Label" value={link.label} onChange={e => updateFooterLink(idx, 'label', e.target.value)} />
+              <input className="cms-input" placeholder="Target URL (/path)" value={link.href} onChange={e => updateFooterLink(idx, 'href', e.target.value)} />
             </div>
             <div className="cms-array-item-actions">
               <button className="cms-icon-btn" disabled={idx === 0} onClick={() => moveFooterLink(idx, 'up')}>↑</button>

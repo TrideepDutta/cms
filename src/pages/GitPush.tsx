@@ -31,7 +31,6 @@ export function GitPush() {
     loadStatus();
   }, [loadStatus]);
 
-  // Clean up timer on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -76,20 +75,21 @@ export function GitPush() {
         showToast(`Failed to push: ${resData.error}`, 'error');
       }
     } catch {
-      showToast('Error pushing to GitHub', 'error');
+      showToast('Error pushing updates to GitHub', 'error');
     }
     setPushing(false);
   };
 
-  if (!status) return <div style={{ padding: '2rem', color: 'var(--cms-text-soft)' }}>Checking git repository status...</div>;
+  if (!status) return <div style={{ padding: '2rem', color: 'var(--cms-ink-soft)', fontFamily: 'var(--font-mono)' }}>Checking git repository status...</div>;
 
   const progressPercent = Math.round(((TOTAL_DEPLOY_SECONDS - countdown) / TOTAL_DEPLOY_SECONDS) * 100);
 
   return (
     <div>
       <div className="cms-page-header">
+        <span className="cms-eyebrow">[ VERSION CONTROL & DEPLOYMENT ]</span>
         <h1>Push Updates to GitHub</h1>
-        <p>Review changes and deploy them to your live website with one click</p>
+        <p>Review uncommitted file changes, generate git commit, and deploy directly to Vercel</p>
       </div>
 
       {/* Deployment Countdown Banner */}
@@ -97,8 +97,10 @@ export function GitPush() {
         <div
           className="cms-card"
           style={{
-            background: deployComplete ? 'rgba(47, 143, 92, 0.12)' : 'rgba(36, 81, 214, 0.12)',
+            background: 'var(--cms-ink)',
+            color: '#FFFFFF',
             borderColor: deployComplete ? 'var(--cms-green)' : 'var(--cms-blue)',
+            borderLeft: `4px solid ${deployComplete ? 'var(--cms-green)' : 'var(--cms-blue)'}`,
             marginBottom: '1.5rem',
             padding: '1.5rem',
           }}
@@ -107,43 +109,43 @@ export function GitPush() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                  <span className="cms-spinner" style={{ borderTopColor: 'var(--cms-blue-soft)' }} />
-                  <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--cms-text)' }}>
-                    ⚡ Vercel Deployment in Progress...
+                  <span className="cms-spinner" />
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', color: '#FFFFFF' }}>
+                    ⚡ Vercel Live Deployment in Progress...
                   </span>
                 </div>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--cms-blue-soft)', fontWeight: 600 }}>
-                  {countdown}s remaining
+                <span style={{ fontFamily: 'var(--font-numeral)', fontSize: '1.1rem', color: 'var(--cms-gold-soft)', fontWeight: 700 }}>
+                  {countdown}s
                 </span>
               </div>
 
-              {/* Animated Progress Bar */}
-              <div style={{ background: 'rgba(255,255,255,0.08)', height: '8px', borderRadius: '4px', overflow: 'hidden', marginBottom: '0.75rem' }}>
+              {/* Progress Bar */}
+              <div style={{ background: 'rgba(255,255,255,0.15)', height: '6px', borderRadius: '2px', overflow: 'hidden', marginBottom: '0.75rem' }}>
                 <div
                   style={{
                     width: `${progressPercent}%`,
                     height: '100%',
-                    background: 'linear-gradient(90deg, #2451D6, #4a7aff)',
-                    borderRadius: '4px',
+                    background: 'var(--cms-blue)',
+                    borderRadius: '2px',
                     transition: 'width 1s linear',
                   }}
                 />
               </div>
 
-              <p style={{ fontSize: '0.8rem', color: 'var(--cms-text-soft)', margin: 0 }}>
-                Building static pages & deploying to Vercel... Your updates will be visible on <strong style={{ color: '#fff' }}>{LIVE_SITE_URL}</strong> shortly.
+              <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.75)', margin: 0, fontFamily: 'var(--font-mono)' }}>
+                Building static pages & deploying to Vercel. Updates will appear on <strong style={{ color: '#FFFFFF' }}>{LIVE_SITE_URL}</strong> shortly.
               </p>
             </div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
-                  <span style={{ color: 'var(--cms-green)', fontSize: '1.1rem', fontWeight: 700 }}>✓</span>
-                  <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--cms-text)' }}>
-                    Vercel Deployment Complete & Live!
+                  <span style={{ color: 'var(--cms-green)', fontSize: '1.2rem', fontWeight: 700 }}>✓</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', color: '#FFFFFF' }}>
+                    Vercel Deployment Live!
                   </span>
                 </div>
-                <p style={{ fontSize: '0.82rem', color: 'var(--cms-text-soft)', margin: 0 }}>
+                <p style={{ fontSize: '0.84rem', color: 'rgba(255,255,255,0.75)', margin: 0 }}>
                   Your website updates are live and visible to visitors.
                 </p>
               </div>
@@ -153,36 +155,36 @@ export function GitPush() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="cms-btn cms-btn-success"
-                style={{ fontSize: '0.82rem', padding: '0.65rem 1.25rem' }}
               >
-                🌐 View Updated Live Website ↗
+                🌐 View Live Website ↗
               </a>
             </div>
           )}
         </div>
       )}
 
+      {/* Main Action Card */}
       <div className="cms-card">
         <div className="cms-card-header">
-          <span className="cms-card-title">One-Click Deploy</span>
+          <span className="cms-card-title">One-Click Git Push & Deploy</span>
           <span className={`cms-card-badge ${status.clean ? 'green' : 'gold'}`}>
-            Branch: {status.branch}
+            BRANCH: {status.branch}
           </span>
         </div>
 
         {status.clean ? (
           <div style={{ padding: '1.5rem 0', textAlign: 'center' }}>
-            <p style={{ color: 'var(--cms-green)', fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+            <p style={{ color: 'var(--cms-green)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'var(--font-display)' }}>
               ✓ All local updates are synced with GitHub!
             </p>
-            <p style={{ color: 'var(--cms-text-soft)', fontSize: '0.85rem' }}>
-              Your working tree is clean. Any edits you make in the CMS will appear here ready to push.
+            <p style={{ color: 'var(--cms-ink-soft)', fontSize: '0.85rem' }}>
+              Working directory is clean. Any edits made in the CMS will appear here ready to push.
             </p>
           </div>
         ) : (
           <div>
             <div className="cms-form-group">
-              <label className="cms-label">Commit Message (Optional)</label>
+              <label className="cms-label">Git Commit Message (Optional)</label>
               <input
                 className="cms-input"
                 placeholder={`CMS update — ${new Date().toLocaleString()}`}
@@ -193,7 +195,7 @@ export function GitPush() {
 
             <button
               className="cms-btn cms-btn-success"
-              style={{ width: '100%', justifyContent: 'center', padding: '0.85rem', fontSize: '0.88rem' }}
+              style={{ width: '100%', justifyContent: 'center', padding: '0.85rem' }}
               onClick={handlePush}
               disabled={pushing || deploying}
             >
@@ -202,27 +204,27 @@ export function GitPush() {
                 ? 'Committing & Pushing to GitHub...'
                 : deploying
                 ? `⚡ Deploying to Vercel (${countdown}s)...`
-                : '🚀 Push Updates to GitHub Now'}
+                : '🚀 Push Updates to GitHub & Deploy Now'}
             </button>
           </div>
         )}
       </div>
 
-      {/* Changed Files List */}
+      {/* Changed Files */}
       {status.status && (
         <div className="cms-card" style={{ marginTop: '1.5rem' }}>
           <div className="cms-card-header">
-            <span className="cms-card-title">Changed Files</span>
+            <span className="cms-card-title">Changed Files List</span>
           </div>
           <pre className="cms-git-status">{status.status}</pre>
         </div>
       )}
 
-      {/* Diff View */}
+      {/* Diff Preview */}
       {diff && (diff.diff || diff.stagedDiff) && (
         <div className="cms-card" style={{ marginTop: '1.5rem' }}>
           <div className="cms-card-header">
-            <span className="cms-card-title">Diff Preview</span>
+            <span className="cms-card-title">Git Diff Preview</span>
           </div>
           <pre className="cms-git-status" style={{ maxHeight: '400px' }}>
             {(diff.diff + '\n' + diff.stagedDiff).split('\n').map((line, idx) => {

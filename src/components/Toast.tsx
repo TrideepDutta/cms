@@ -34,8 +34,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       {toasts.map(toast => (
         <div key={toast.id} className={`cms-toast ${toast.type}`}>
-          <span>{toast.type === 'success' ? '✓' : toast.type === 'error' ? '✕' : 'ℹ'}</span>
-          {toast.message}
+          <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+            {toast.type === 'success' ? '✓' : toast.type === 'error' ? '✕' : 'ℹ'}
+          </span>
+          <span>{toast.message}</span>
         </div>
       ))}
     </ToastContext.Provider>

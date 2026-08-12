@@ -139,7 +139,7 @@ export function BlogManager() {
     const selectedText = text.substring(start, end) || 'text';
     const replacement = `${prefix}${selectedText}${suffix}`;
     const newBody = text.substring(0, start) + replacement + text.substring(end);
-    
+
     setEditingPost({ ...editingPost, body: newBody });
     setTimeout(() => {
       textarea.focus();
@@ -147,18 +147,17 @@ export function BlogManager() {
     }, 0);
   };
 
-  // Simple Markdown to HTML Parser for Live Preview
   const renderMarkdownPreview = (md: string) => {
     if (!md) return '';
     let html = md
-      .replace(/^### (.*$)/gim, '<h3 style="font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 0.5rem; color: #fff;">$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2 style="font-size: 1.5rem; font-weight: 700; margin: 1.75rem 0 0.75rem; color: #fff;">$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1 style="font-size: 1.85rem; font-weight: 700; margin: 2rem 0 1rem; color: #fff;">$1</h1>')
+      .replace(/^### (.*$)/gim, '<h3 style="font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; margin: 1.5rem 0 0.5rem; color: var(--cms-ink);">$1</h3>')
+      .replace(/^## (.*$)/gim, '<h2 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; margin: 1.75rem 0 0.75rem; color: var(--cms-ink);">$1</h2>')
+      .replace(/^# (.*$)/gim, '<h1 style="font-family: var(--font-display); font-size: 1.75rem; font-weight: 700; margin: 2rem 0 1rem; color: var(--cms-ink);">$1</h1>')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`([^`]+)`/g, '<code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace;">$1</code>')
+      .replace(/`([^`]+)`/g, '<code style="background: rgba(19,22,28,0.06); padding: 2px 6px; border-radius: 2px; font-family: var(--font-mono); font-size: 0.85rem;">$1</code>')
       .replace(/^\s*-\s+(.*$)/gim, '<li style="margin-left: 1.25rem; list-style-type: disc;">$1</li>')
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: #4a7aff; text-decoration: underline;">$1</a>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: var(--cms-blue); text-decoration: underline;">$1</a>')
       .replace(/\n\n/g, '<br/><br/>');
     return html;
   };
@@ -167,8 +166,9 @@ export function BlogManager() {
     <div>
       <div className="cms-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <h1>Blog Posts</h1>
-          <p>Create, edit, and publish Markdown blog articles</p>
+          <span className="cms-eyebrow">[ CONTENT MANAGEMENT ]</span>
+          <h1>Blog Articles</h1>
+          <p>Create, edit, and publish markdown articles and frontmatter metadata</p>
         </div>
         {!editingPost && (
           <button className="cms-btn cms-btn-primary" onClick={createNewPost}>
@@ -180,9 +180,9 @@ export function BlogManager() {
       {editingPost ? (
         <div className="cms-card">
           <div className="cms-card-header">
-            <span className="cms-card-title">Editing: {editingPost.title}</span>
+            <span className="cms-card-title">Editing: {editingPost.title || editingPost.slug}</span>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <div style={{ display: 'flex', background: 'var(--cms-bg-input)', padding: '2px', borderRadius: '6px', border: '1px solid var(--cms-border)' }}>
+              <div style={{ display: 'flex', background: '#FFFFFF', padding: '2px', borderRadius: '2px', border: '1px solid var(--cms-line-strong)' }}>
                 <button className={`cms-btn cms-btn-sm ${viewMode === 'edit' ? 'cms-btn-primary' : 'cms-btn-ghost'}`} onClick={() => setViewMode('edit')}>Code</button>
                 <button className={`cms-btn cms-btn-sm ${viewMode === 'split' ? 'cms-btn-primary' : 'cms-btn-ghost'}`} onClick={() => setViewMode('split')}>Split</button>
                 <button className={`cms-btn cms-btn-sm ${viewMode === 'preview' ? 'cms-btn-primary' : 'cms-btn-ghost'}`} onClick={() => setViewMode('preview')}>Preview</button>
@@ -207,8 +207,8 @@ export function BlogManager() {
                 value={editingPost.draft ? 'draft' : 'published'}
                 onChange={e => setEditingPost({ ...editingPost, draft: e.target.value === 'draft' })}
               >
-                <option value="published">Published (Visible on site)</option>
-                <option value="draft">Draft (Hidden from site)</option>
+                <option value="published">Published (Visible on website)</option>
+                <option value="draft">Draft (Hidden from website)</option>
               </select>
             </div>
           </div>
@@ -228,7 +228,7 @@ export function BlogManager() {
           </div>
 
           <div className="cms-form-group">
-            <label className="cms-label">Excerpt / Short Description</label>
+            <label className="cms-label">Excerpt / Short Summary</label>
             <textarea className="cms-textarea" rows={2} value={editingPost.excerpt} onChange={e => setEditingPost({ ...editingPost, excerpt: e.target.value })} />
           </div>
 
@@ -257,7 +257,7 @@ export function BlogManager() {
           {/* Markdown Toolbar */}
           <div className="cms-form-group">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <label className="cms-label" style={{ marginBottom: 0 }}>Article Content (Markdown)</label>
+              <label className="cms-label" style={{ marginBottom: 0 }}>Article Markdown Content</label>
               <div style={{ display: 'flex', gap: '0.25rem' }}>
                 <button type="button" className="cms-btn cms-btn-ghost cms-btn-sm" onClick={() => insertMarkdown('## ')}>H2</button>
                 <button type="button" className="cms-btn cms-btn-ghost cms-btn-sm" onClick={() => insertMarkdown('### ')}>H3</button>
@@ -283,15 +283,16 @@ export function BlogManager() {
               {(viewMode === 'preview' || viewMode === 'split') && (
                 <div
                   style={{
-                    background: 'var(--cms-bg-input)',
-                    border: '1px solid var(--cms-border)',
-                    borderRadius: '0.6rem',
-                    padding: '1.25rem',
+                    background: '#FFFFFF',
+                    border: '1px solid var(--cms-line-strong)',
+                    borderRadius: '2px',
+                    padding: '1.5rem',
                     minHeight: '400px',
                     maxHeight: '600px',
                     overflowY: 'auto',
                     lineHeight: '1.7',
-                    fontSize: '0.95rem',
+                    fontSize: '0.92rem',
+                    color: 'var(--cms-ink)',
                   }}
                   dangerouslySetInnerHTML={{ __html: renderMarkdownPreview(editingPost.body || '') }}
                 />
@@ -302,33 +303,36 @@ export function BlogManager() {
       ) : (
         <div className="cms-card">
           {loading ? (
-            <div style={{ color: 'var(--cms-text-soft)', padding: '1rem' }}>Loading posts...</div>
+            <div style={{ color: 'var(--cms-ink-soft)', padding: '1rem', fontFamily: 'var(--font-mono)' }}>Loading blog articles...</div>
           ) : posts.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
-              <p style={{ color: 'var(--cms-text-soft)', marginBottom: '1rem' }}>No blog posts found in <code>src/content/blog/</code></p>
+              <p style={{ color: 'var(--cms-ink-soft)', marginBottom: '1rem' }}>No blog articles found in <code>src/content/blog/</code></p>
               <button className="cms-btn cms-btn-primary" onClick={createNewPost}>
-                + Create Your First Article
+                + Create First Article
               </button>
             </div>
           ) : (
             <div>
-              {posts.map(post => (
+              {posts.map((post, idx) => (
                 <div key={post.slug} className="cms-array-item" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                      <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.35rem' }}>
+                      <span style={{ fontFamily: 'var(--font-numeral)', fontSize: '0.85rem', fontWeight: 700, color: 'var(--cms-blue)' }}>
+                        #{String(idx + 1).padStart(2, '0')}
+                      </span>
+                      <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--cms-ink)' }}>
                         {post.title || post.slug}
                       </span>
                       <span className={`cms-card-badge ${post.draft ? 'gold' : 'green'}`}>
                         {post.draft ? 'Draft' : 'Published'}
                       </span>
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--cms-text-soft)', fontFamily: 'var(--font-mono)' }}>
-                      Category: <span style={{ color: 'var(--cms-blue-soft)' }}>{post.category || 'General'}</span> • Date: {post.date || 'Draft'}
+                    <div style={{ fontSize: '0.78rem', color: 'var(--cms-ink-soft)', fontFamily: 'var(--font-mono)' }}>
+                      Category: <span style={{ color: 'var(--cms-blue)', fontWeight: 600 }}>{post.category || 'General'}</span> • Date: {post.date || 'Draft'}
                     </div>
                   </div>
-                  <div className="cms-array-item-actions">
-                    <button className="cms-btn cms-btn-ghost cms-btn-sm" onClick={() => editPost(post.slug)}>Edit</button>
+                  <div className="cms-array-item-actions" style={{ gap: '0.5rem' }}>
+                    <button className="cms-btn cms-btn-ghost cms-btn-sm" onClick={() => editPost(post.slug)}>Edit Article</button>
                     <button className="cms-icon-btn danger" title="Delete Post" onClick={() => deletePost(post)}>✕</button>
                   </div>
                 </div>
