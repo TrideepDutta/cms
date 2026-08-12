@@ -112,14 +112,15 @@ export function BlogManager() {
     setSaving(false);
   };
 
-  const deletePost = async (slug: string) => {
-    if (!window.confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
+  const deletePost = async (post: BlogPost) => {
+    const postTitle = post.title || post.slug;
+    if (!window.confirm(`Delete '${postTitle}'? This cannot be undone.`)) return;
     try {
-      const res = await fetch(`/api/blog/${slug}`, { method: 'DELETE' });
+      const res = await fetch(`/api/blog/${post.slug}`, { method: 'DELETE' });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.success) {
         showToast('Post deleted from disk');
-        if (editingPost?.slug === slug) setEditingPost(null);
+        if (editingPost?.slug === post.slug) setEditingPost(null);
         loadPosts();
       } else {
         showToast(data.error || 'Failed to delete post from disk', 'error');
@@ -328,7 +329,7 @@ export function BlogManager() {
                   </div>
                   <div className="cms-array-item-actions">
                     <button className="cms-btn cms-btn-ghost cms-btn-sm" onClick={() => editPost(post.slug)}>Edit</button>
-                    <button className="cms-icon-btn danger" onClick={() => deletePost(post.slug)}>✕</button>
+                    <button className="cms-icon-btn danger" title="Delete Post" onClick={() => deletePost(post)}>✕</button>
                   </div>
                 </div>
               ))}

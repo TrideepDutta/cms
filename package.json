@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"vite\" \"tsx server/api.ts\"",
+    "dev": "concurrently \"vite\" \"tsx watch server/api.ts\"",
     "build": "vite build",
     "preview": "vite preview"
   },

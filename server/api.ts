@@ -76,9 +76,9 @@ app.get('/api/blog', (_req, res) => {
         const content = readFileSync(join(BLOG_DIR, f), 'utf-8');
         const frontmatter = parseFrontmatter(content);
         return {
+          ...frontmatter,
           slug: f.replace(/\.(md|mdx)$/, ''),
           filename: f,
-          ...frontmatter,
         };
       });
     res.json(files);
@@ -93,6 +93,11 @@ app.get('/api/blog/:slug', (req, res) => {
     let filePath = join(BLOG_DIR, `${cleanSlug}.md`);
     if (!existsSync(filePath)) {
       filePath = join(BLOG_DIR, `${cleanSlug}.mdx`);
+    }
+    if (!existsSync(filePath)) {
+      const files = readdirSync(BLOG_DIR);
+      const match = files.find(f => f.replace(/\.(md|mdx)$/, '') === cleanSlug);
+      if (match) filePath = join(BLOG_DIR, match);
     }
     if (!existsSync(filePath)) {
       return res.status(404).json({ error: 'Blog post not found' });
@@ -134,6 +139,11 @@ app.delete('/api/blog/:slug', (req, res) => {
     let filePath = join(BLOG_DIR, `${cleanSlug}.md`);
     if (!existsSync(filePath)) {
       filePath = join(BLOG_DIR, `${cleanSlug}.mdx`);
+    }
+    if (!existsSync(filePath)) {
+      const files = readdirSync(BLOG_DIR);
+      const match = files.find(f => f.replace(/\.(md|mdx)$/, '') === cleanSlug);
+      if (match) filePath = join(BLOG_DIR, match);
     }
     if (!existsSync(filePath)) {
       return res.status(404).json({ error: `Blog post "${cleanSlug}" not found on disk` });
