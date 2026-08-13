@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { ThemeToggle } from './ThemeToggle';
 
 const pageLinks = [
   { path: '/edit/home', label: 'Home Page', num: '01' },
@@ -53,6 +54,7 @@ export function Sidebar() {
       </NavLink>
 
       <div className="cms-sidebar-footer">
+        <ThemeToggle />
         <NavLink to="/push" className="cms-btn cms-btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
           Push to GitHub →
         </NavLink>

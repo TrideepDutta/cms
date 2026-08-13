@@ -7,25 +7,28 @@ import { NavigationEditor } from './pages/NavigationEditor';
 import { BlogManager } from './pages/BlogManager';
 import { GitPush } from './pages/GitPush';
 import { ToastProvider } from './components/Toast';
+import { ThemeProvider } from './context/ThemeContext';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <ToastProvider>
-        <div className="cms-layout">
-          <Sidebar />
-          <main className="cms-main">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/edit/:page" element={<PageEditor />} />
-              <Route path="/site-settings" element={<SiteSettings />} />
-              <Route path="/navigation" element={<NavigationEditor />} />
-              <Route path="/blog" element={<BlogManager />} />
-              <Route path="/push" element={<GitPush />} />
-            </Routes>
-          </main>
-        </div>
-      </ToastProvider>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <ToastProvider>
+          <div className="cms-layout">
+            <Sidebar />
+            <main className="cms-main">
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/edit/:page" element={<PageEditor />} />
+                <Route path="/site-settings" element={<SiteSettings />} />
+                <Route path="/navigation" element={<NavigationEditor />} />
+                <Route path="/blog" element={<BlogManager />} />
+                <Route path="/push" element={<GitPush />} />
+              </Routes>
+            </main>
+          </div>
+        </ToastProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }

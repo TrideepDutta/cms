@@ -98,7 +98,7 @@ export function GitPush() {
           className="cms-card"
           style={{
             background: 'var(--cms-ink)',
-            color: '#FFFFFF',
+            color: 'var(--cms-canvas)',
             borderColor: deployComplete ? 'var(--cms-green)' : 'var(--cms-blue)',
             borderLeft: `4px solid ${deployComplete ? 'var(--cms-green)' : 'var(--cms-blue)'}`,
             marginBottom: '1.5rem',
@@ -110,17 +110,17 @@ export function GitPush() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                   <span className="cms-spinner" />
-                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', color: '#FFFFFF' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', color: 'var(--cms-canvas)' }}>
                     ⚡ Vercel Live Deployment in Progress...
                   </span>
                 </div>
-                <span style={{ fontFamily: 'var(--font-numeral)', fontSize: '1.1rem', color: 'var(--cms-gold-soft)', fontWeight: 700 }}>
+                <span style={{ fontFamily: 'var(--font-numeral)', fontSize: '1.1rem', color: 'var(--cms-gold)', fontWeight: 700 }}>
                   {countdown}s
                 </span>
               </div>
 
               {/* Progress Bar */}
-              <div style={{ background: 'rgba(255,255,255,0.15)', height: '6px', borderRadius: '2px', overflow: 'hidden', marginBottom: '0.75rem' }}>
+              <div style={{ background: 'var(--cms-hover)', height: '6px', borderRadius: '2px', overflow: 'hidden', marginBottom: '0.75rem' }}>
                 <div
                   style={{
                     width: `${progressPercent}%`,
@@ -132,8 +132,8 @@ export function GitPush() {
                 />
               </div>
 
-              <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.75)', margin: 0, fontFamily: 'var(--font-mono)' }}>
-                Building static pages & deploying to Vercel. Updates will appear on <strong style={{ color: '#FFFFFF' }}>{LIVE_SITE_URL}</strong> shortly.
+              <p style={{ fontSize: '0.82rem', color: 'var(--cms-canvas)', opacity: 0.85, margin: 0, fontFamily: 'var(--font-mono)' }}>
+                Building static pages & deploying to Vercel. Updates will appear on <strong style={{ color: 'var(--cms-canvas)' }}>{LIVE_SITE_URL}</strong> shortly.
               </p>
             </div>
           ) : (
@@ -141,11 +141,11 @@ export function GitPush() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
                   <span style={{ color: 'var(--cms-green)', fontSize: '1.2rem', fontWeight: 700 }}>✓</span>
-                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', color: '#FFFFFF' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', color: 'var(--cms-canvas)' }}>
                     Vercel Deployment Live!
                   </span>
                 </div>
-                <p style={{ fontSize: '0.84rem', color: 'rgba(255,255,255,0.75)', margin: 0 }}>
+                <p style={{ fontSize: '0.84rem', color: 'var(--cms-canvas)', opacity: 0.85, margin: 0 }}>
                   Your website updates are live and visible to visitors.
                 </p>
               </div>

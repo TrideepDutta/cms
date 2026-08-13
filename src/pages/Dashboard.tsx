@@ -100,8 +100,8 @@ export function Dashboard() {
             <div className="eyebrow">AGENCY CMS CONTROL PANEL</div>
             <h2>GetUsRanked Live Repository</h2>
             <p>
-              Branch: <strong style={{ color: '#FFFFFF', fontFamily: 'var(--font-mono)' }}>{gitStatus.branch}</strong> • Status:{' '}
-              <span style={{ color: gitStatus.clean ? 'var(--cms-green)' : 'var(--cms-gold)', fontWeight: 600 }}>
+              Branch: <strong style={{ color: 'var(--cms-canvas)', fontFamily: 'var(--font-mono)' }}>{gitStatus.branch}</strong> • Status:{' '}
+              <span className={gitStatus.clean ? 'status-clean' : 'status-pending'} style={{ color: gitStatus.clean ? 'var(--cms-green)' : undefined }}>
                 {gitStatus.clean ? '✓ Clean & Synced' : '● Uncommitted Changes Pending'}
               </span>
             </p>
@@ -114,7 +114,7 @@ export function Dashboard() {
               🚀 Push Updates →
             </Link>
           ) : (
-            <Link to="/push" className="cms-btn cms-btn-ghost" style={{ color: '#FFFFFF', borderColor: 'rgba(255,255,255,0.3)' }}>
+            <Link to="/push" className="cms-btn cms-btn-ghost cms-btn-rank-widget">
               Repo Status →
             </Link>
           )}
